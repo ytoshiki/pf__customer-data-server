@@ -1,14 +1,29 @@
 import express from 'express';
-import { setCustomers, getAllCustomers } from '../controllers';
+import { createCustomer, deleteCustomerById, getAllCustomers, getCustomerById, getCustomersByAge, getCustomersByGender, getCustomersByNat, updateCustomerById } from '../controllers';
 
 const router = express.Router();
 
 // api/customers/
-// create, read
+// POST: Set a new customer
+// GET: Get all customers
+router.route('/').get(getAllCustomers).post(createCustomer);
+
+// api/customers/category/gender/:gender
+// GET: Get customers matched
+router.route('/category/gender/:gender').get(getCustomersByGender);
+
+// api/customers/category/age/:age
+// GET: Get customers matched
+router.route('/category/age/:age').get(getCustomersByAge);
+
+// api/customers/category/nat/:nat
+// GET: Get customers matched
+router.route('/category/nat/:nat').get(getCustomersByNat);
 
 // api/customers/:id
-// update, delete, read
-
-router.route('/').get(getAllCustomers).post(setCustomers);
+// GET: Get customer by Id
+// DELETE: Delete customer by id
+// PATCH: Update user by id
+router.route('/:id').get(getCustomerById).delete(deleteCustomerById).patch(updateCustomerById);
 
 export default router;

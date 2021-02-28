@@ -71,3 +71,27 @@ export const signInAdmin = async (req: Request, res: Response) => {
     // }
   } catch (error) {}
 };
+
+export const logoutAdmin = (req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: 'Admin Logged Out Succesfully'
+  });
+};
+
+export const deleteAdmin = async (req: Request, res: Response) => {
+  const adminId = (req as any).adminId;
+  try {
+    const admin = await Admin.findByIdAndDelete(adminId);
+    if (!admin)
+      res.status(401).json({
+        success: false,
+        message: 'Admin Not Found'
+      });
+
+    res.status(200).json({
+      success: true,
+      message: 'Admin Deleted Successfully'
+    });
+  } catch (error) {}
+};

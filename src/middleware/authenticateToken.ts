@@ -14,7 +14,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     if (err) return res.status(400).json({ success: false, message: err.message });
 
     if (decoded) {
-      (req as any).userId = (decoded as { id: string }).id;
+      (req as any).adminId = (decoded as { id: string }).id;
     }
   });
 

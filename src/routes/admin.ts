@@ -1,5 +1,5 @@
 import express, { Request } from 'express';
-import { createAdmin, signInAdmin } from '../controllers';
+import { createAdmin, deleteAdmin, logoutAdmin, signInAdmin } from '../controllers';
 import { authenticateToken } from '../middleware';
 const router = express.Router();
 
@@ -17,7 +17,9 @@ router.route('/register').post(createAdmin);
 router.route('/login').post(signInAdmin);
 
 // Post: Log out
+router.route('/logout').post(authenticateToken, logoutAdmin);
 
 // Post: Delete Admin
+router.route('/delete').post(authenticateToken, deleteAdmin);
 
 export default router;

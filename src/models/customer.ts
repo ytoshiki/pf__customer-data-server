@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Customer from '../interfaces/customer';
 
 const CustomerSchema = new mongoose.Schema(
   {
@@ -10,18 +11,31 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    nat: String,
-    age: Number,
-    dateRegisterd: {
+    nat: {
       type: String,
-      default: null
+      enum: ['GB', 'FR', 'DK', 'NO', 'NL', 'US', 'NZ', 'FI', 'ES', 'CA', 'BR', 'AU', 'JP'],
+      required: true
     },
-    gender: String,
+    age: {
+      type: Number,
+      min: 17,
+      max: 100,
+      required: true
+    },
+    dateRegistered: {
+      type: Date,
+      required: true
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female'],
+      required: true
+    },
     avator: {
       type: String,
       default: null
     },
-    ItemsPurchases: [
+    purchasedItems: [
       {
         Item: {
           type: mongoose.Schema.Types.ObjectId,
@@ -35,4 +49,4 @@ const CustomerSchema = new mongoose.Schema(
   }
 );
 
-export const Customer = mongoose.model('Customer', CustomerSchema);
+export const Customer = mongoose.model<Customer>('Customer', CustomerSchema);
