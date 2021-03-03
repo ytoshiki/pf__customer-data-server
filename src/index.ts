@@ -2,7 +2,8 @@ import express from 'express';
 import './database';
 import customerRouter from './routes/customer';
 import adminRouter from './routes/admin';
-import cookieParser from 'cookie-parser';
+import categoryRouter from './routes/categoty';
+import productRouter from './routes/product';
 
 const app = express();
 
@@ -12,6 +13,8 @@ app.use(express.urlencoded());
 
 app.use('/api/customers', customerRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/categories', categoryRouter);
+app.use('/api/products', productRouter);
 
 app.get('/', (req, res) => {
   const name = ((req as any).name = 'bob');

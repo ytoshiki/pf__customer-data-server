@@ -1,4 +1,5 @@
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
+import { IProduct } from '../interfaces/product';
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -11,10 +12,12 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
-    image: {
-      type: String,
-      required: true
-    },
+    images: [
+      {
+        type: String,
+        required: true
+      }
+    ],
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
@@ -34,4 +37,22 @@ const ProductSchema = new mongoose.Schema(
   }
 );
 
-export const Product = mongoose.model('Product', ProductSchema);
+ProductSchema.methods.addImages = async function (image: string) {
+  (this as any).images = (this as any).images.push(image);
+  try {
+    await (this as any).save();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+ProductSchema.methods.addReviews = async function (review: ObjectId) {
+  (this as any).reviews = (this as any).reviews.push(review);
+  try {
+    await (this as any).save();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const Product = mongoose.model<IProduct>('Product', ProductSchema);
