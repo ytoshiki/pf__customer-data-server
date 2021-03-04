@@ -1,16 +1,21 @@
 import mongoose from 'mongoose';
 
-const PurchaseSchema = new mongoose.Schema({
-  item: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true,
-    unique: true
+const PurchaseSchema = new mongoose.Schema(
+  {
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true
+    },
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Customer',
+      required: true
+    }
   },
-  total: {
-    type: Number,
-    default: 0
+  {
+    timestamps: true
   }
-});
+);
 
 export const Purchase = mongoose.model('Purchase', PurchaseSchema);

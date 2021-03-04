@@ -6,14 +6,15 @@ const ReviewSchema = new mongoose.Schema(
   {
     rating: {
       type: Number,
-      enum: RatingEnum
+      enum: RatingEnum,
+      required: true
     },
-    item: {
+    product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
       required: true
     },
-    user: {
+    customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Customer',
       required: true

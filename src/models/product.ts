@@ -1,4 +1,4 @@
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose, { Model, ObjectId } from 'mongoose';
 import { IProduct } from '../interfaces/product';
 
 const ProductSchema = new mongoose.Schema(
@@ -25,10 +25,8 @@ const ProductSchema = new mongoose.Schema(
     },
     reviews: [
       {
-        review: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Review'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review'
       }
     ]
   },
@@ -46,13 +44,31 @@ ProductSchema.methods.addImages = async function (image: string) {
   }
 };
 
-ProductSchema.methods.addReviews = async function (review: ObjectId) {
-  (this as any).reviews = (this as any).reviews.push(review);
+ProductSchema.statics.filterReviewById = async function (r_id) {
   try {
-    await (this as any).save();
+    const targets = await this.find({
+      reviews: {
+        $in: [r_id]
+      }
+    });
+
+    for (let target of targets) {
+      (target as any).reviews = (target as any).reviews.filter((review: ObjectId) => {
+        return review.toString() !== r_id;
+      });
+
+      await target.save();
+    }
+
+    return true;
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
+    return false;
   }
 };
 
-export const Product = mongoose.model<IProduct>('Product', ProductSchema);
+interface IProductModel extends Model<IProduct> {
+  filterReviewById(r_id: string): boolean;
+}
+
+export const Product = mongoose.model<IProduct, IProductModel>('Product', ProductSchema);

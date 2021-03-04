@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import Customer from '../interfaces/customer';
 
 const CustomerSchema = new mongoose.Schema(
@@ -37,10 +37,8 @@ const CustomerSchema = new mongoose.Schema(
     },
     purchasedItems: [
       {
-        Item: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product'
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Product'
       }
     ]
   },

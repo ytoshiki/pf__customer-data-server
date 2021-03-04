@@ -43,7 +43,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 export const getCustomerById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const customer = await Customer.findById(id);
+    const customer = await Customer.findOne({ _id: id }).populate('purchasedItems');
 
     if (!customer) {
       return res.status(404).json({
