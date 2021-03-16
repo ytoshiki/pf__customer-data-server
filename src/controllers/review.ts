@@ -3,6 +3,7 @@ import { Product } from '../models/product';
 import { Review } from '../models/review';
 
 export const addReview = async (req: Request, res: Response) => {
+  // Check if mandatory fields are filled out
   const mandatoryFields = ['rating', 'product', 'customer'];
 
   const isFilled = (f: string): boolean => req.body[f];
@@ -16,6 +17,7 @@ export const addReview = async (req: Request, res: Response) => {
   }
 
   try {
+    // Search if the product exists
     const product = await Product.findOne({ _id: req.body.product });
 
     if (!product) {
@@ -25,6 +27,7 @@ export const addReview = async (req: Request, res: Response) => {
       });
     }
 
+    // Save Review
     const review = new Review(req.body);
     const newReview = await review.save();
 
@@ -35,6 +38,7 @@ export const addReview = async (req: Request, res: Response) => {
       });
     }
 
+    // Put the new review on product model
     const reviewProduct = await Product.findByIdAndUpdate(
       req.body.product,
       {
@@ -80,6 +84,28 @@ export const getAllReviews = async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       reviews
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const getReviewById = async (req: Request, res: Response) => {
+  try {
+    const review = await Review.findOne({ _id: req.params.id });
+    if (!review) {
+      return res.status(401).json({
+        success: false,
+        message: 'Review Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      review
     });
   } catch (error) {
     res.status(500).json({
@@ -205,6 +231,61 @@ export const deleteReviewById = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: error.message
+    });
+  }
+};
+
+export const calcSatisfaction = async (req: Request, res: Response) => {
+  try {
+    const reviews = await Review.find({});
+    if (!reviews.length) {
+      return res.status(401).json({
+        success: false,
+        message: 'Reviews Not Found'
+      });
+    }
+
+    const avarageSatisfaction =
+      reviews
+        .map((review: any) => {
+          let satisfaction: number;
+
+          if (review.rating === 1) {
+            satisfaction = 0;
+          } else if (review.rating === 1.5) {
+            satisfaction = 12.5;
+          } else if (review.rating === 2) {
+            satisfaction = 25;
+          } else if (review.rating === 2.5) {
+            satisfaction = 37.5;
+          } else if (review.rating === 3) {
+            satisfaction = 50;
+          } else if (review.rating === 3.5) {
+            satisfaction = 62.5;
+          } else if (review.rating === 4) {
+            satisfaction = 75;
+          } else if (review.rating === 4.5) {
+            satisfaction = 87.5;
+          } else if (review.rating === 5) {
+            satisfaction = 100;
+          } else {
+            satisfaction = 100;
+          }
+
+          return {
+            satisfaction
+          };
+        })
+        .reduce((a, b) => a + b.satisfaction, 0) / reviews.length;
+
+    res.status(200).json({
+      success: true,
+      satisfaction: Math.floor(avarageSatisfaction * 10) / 10
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };

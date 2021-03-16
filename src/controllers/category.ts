@@ -1,4 +1,3 @@
-import { ESRCH } from 'constants';
 import { Request, Response } from 'express';
 import { Category } from '../models/category';
 

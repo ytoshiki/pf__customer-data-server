@@ -3,13 +3,6 @@ import { createAdmin, deleteAdmin, logoutAdmin, signInAdmin } from '../controlle
 import { authenticateToken } from '../middleware';
 const router = express.Router();
 
-// TEST
-router.route('/test').get(authenticateToken, (req, res) => {
-  res.send({
-    id: (req as any).userId
-  });
-});
-
 // POST: Create Admin
 router.route('/register').post(createAdmin);
 

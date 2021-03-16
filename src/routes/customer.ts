@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCustomer, deleteCustomerById, getAllCustomers, getCustomerById, getCustomersByAge, getCustomersByGender, getCustomersByNat, updateCustomerById } from '../controllers';
+import { createCustomer, deleteCustomerById, getAllCustomers, getCustomerById, getCustomersByAge, getCustomersByGender, getCustomersByNat, getCustomersByRegisterYear, getCustomesHavePurchased, updateCustomerById } from '../controllers';
 
 const router = express.Router();
 
@@ -7,6 +7,12 @@ const router = express.Router();
 // POST: Set a new customer
 // GET: Get all customers
 router.route('/').get(getAllCustomers).post(createCustomer);
+
+// api/customers/purchased
+router.route('/purchased').get(getCustomesHavePurchased);
+
+// api/customers/registered/:year
+router.route('/registered/:year').get(getCustomersByRegisterYear);
 
 // api/customers/category/gender/:gender
 // GET: Get customers matched

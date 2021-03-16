@@ -175,6 +175,92 @@ export const getCustomersByNat = async (req: Request, res: Response) => {
   }
 };
 
+// Returns Customers Who have purchased products
+// () => _id, purchasesItems, username
+export const getCustomesHavePurchased = async (req: Request, res: Response) => {
+  try {
+    const customers = await Customer.find({
+      purchasedItems: {
+        $exists: true,
+        $not: { $size: 0 }
+      }
+    })
+      .populate('purchasedItems')
+      .select('_id username purchasedItems');
+    // .populate('purchasedItems');
+
+    if (!customers) {
+      return res.status(401).json({
+        success: false,
+        message: 'Customers Not Found'
+      });
+    }
+
+    const sortedCustomers = customers
+      .map((customer) => {
+        return {
+          id: customer._id,
+          username: customer.username,
+          totalPurchases: Math.floor(customer.purchasedItems.reduce((acc, obj) => acc + obj.price, 0) * 100) / 100
+        };
+      })
+      .sort((cus1, cus2) => cus2.totalPurchases - cus1.totalPurchases);
+
+    res.status(201).json({
+      success: true,
+      customers: sortedCustomers
+    });
+  } catch (error) {}
+};
+
+export const getCustomersByRegisterYear = async (req: Request, res: Response) => {
+  const year: number = Number(req.params.year);
+
+  if (year > 10) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid year'
+    });
+  }
+
+  // Start Date
+
+  let startDate = new Date('2020-01-01').setFullYear(new Date().getFullYear() - year);
+
+  // End Date
+
+  const endDate = new Date('2020-01-01').setFullYear(new Date().getFullYear() - year + 1);
+
+  try {
+    const customers = await Customer.find({
+      dateRegistered: {
+        $gt: new Date(startDate),
+        $lt: new Date(endDate)
+      }
+    });
+
+    if (!customers) {
+      return res.status(401).json({
+        success: false,
+        message: 'Customers Not Found'
+      });
+    }
+
+    const number = customers.length;
+
+    res.status(200).json({
+      success: true,
+      number,
+      customers
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 //
 //
 // POST REQUESTS

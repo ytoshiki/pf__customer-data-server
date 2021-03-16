@@ -1,4 +1,6 @@
 import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
 import './database';
 import customerRouter from './routes/customer';
 import adminRouter from './routes/admin';
@@ -9,10 +11,13 @@ import reviewRouter from './routes/review';
 
 const app = express();
 
-// setup
+// Setup
 app.use(express.json());
 app.use(express.urlencoded());
+app.use(cors());
+app.use(helmet());
 
+// Routes
 app.use('/api/customers', customerRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/categories', categoryRouter);

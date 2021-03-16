@@ -21,6 +21,46 @@ export const getAllProducts = async (req: Request, res: Response) => {
   } catch (error) {}
 };
 
+export const getProductsWithRating = async (req: Request, res: Response) => {
+  try {
+    const products = await Product.find({}).populate('reviews');
+
+    if (!products) {
+      return res.status(401).json({
+        success: false,
+        message: 'Products Not Found'
+      });
+    }
+
+    const ratingData = products
+      .map((product) => {
+        let rating: number = 0;
+
+        if (product.reviews.length !== 0) {
+          product.reviews.forEach((review: { rating: number }) => {
+            rating += review.rating;
+          });
+
+          rating = rating / product.reviews.length;
+        }
+
+        return {
+          name: product.name,
+          id: product._id,
+          rating: Math.floor(rating * 10) / 10
+        };
+      })
+      .sort((a, b) => {
+        return b.rating - a.rating;
+      });
+
+    res.status(200).json({
+      success: true,
+      data: ratingData
+    });
+  } catch (error) {}
+};
+
 export const addProduct = async (req: Request, res: Response) => {
   const mandatoryFields = ['name', 'price', 'images', 'category'];
   const validate = (f: string) => req.body[f];
