@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { Customer } from '../models/customer';
 import { Product } from '../models/product';
 import { Purchase } from '../models/purchase';
@@ -16,6 +17,56 @@ export const logAllPurchases = async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       purchases
+    });
+  } catch (error) {}
+};
+
+export const logPurchasesByCustomerId = async (req: Request, res: Response) => {
+  try {
+    const c_id = req.params.c_id;
+
+    // customer: mongoose.Types.ObjectId(c_id)
+
+    const purchases = await Purchase.find({
+      customer: mongoose.Types.ObjectId(c_id)
+    }).populate('product');
+
+    if (!purchases.length) {
+      return res.status(401).json({
+        success: false,
+        message: 'Purchases Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      purchases
+    });
+  } catch (error) {}
+};
+
+export const logPurchase = async (req: Request, res: Response) => {
+  try {
+    const c_id = req.params.c_id;
+    const p_id = req.params.p_id;
+
+    // customer: mongoose.Types.ObjectId(c_id)
+
+    const purchase = await Purchase.findOne({
+      product: mongoose.Types.ObjectId(p_id),
+      customer: mongoose.Types.ObjectId(c_id)
+    });
+
+    if (!purchase) {
+      return res.status(401).json({
+        success: false,
+        message: 'Purchase Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      purchase
     });
   } catch (error) {}
 };

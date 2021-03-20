@@ -68,17 +68,45 @@ export const getCustomersByGender = async (req: Request, res: Response) => {
   const gender = req.params.gender;
 
   try {
-    const customers = await Customer.find({ gender });
-    if (customers.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Invalid gender'
-      });
+    let sort = {};
+    let by = -1;
+
+    if (req.params.by === 'desc') {
+      by = 1;
     }
+
+    if (req.params.sort === 'name') {
+      sort = {
+        username: by
+      };
+    } else if (req.params.sort === 'date') {
+      sort = {
+        dateRegistered: by
+      };
+    }
+
+    let start = 1;
+    let end = 20;
+
+    let page = Number(req.params.page);
+
+    start = (page - 1) * end;
+
+    const customers = await Customer.find({ gender }).sort(sort);
+
+    const paginatedItems = customers.slice(start).slice(0, end);
+
+    const totalPages = Math.ceil(customers.length / 20);
 
     res.status(200).json({
       success: true,
-      customers
+      page,
+      pre_page: page - 1 ? page - 1 : null,
+      next_page: totalPages > page ? page + 1 : null,
+      total_page: totalPages,
+      per_page: end,
+      total: customers.length,
+      data: paginatedItems
     });
   } catch (error) {
     res.status(500).json({
@@ -92,30 +120,54 @@ export const getCustomersByAge = async (req: Request, res: Response) => {
   const ageParam = req.params.age;
 
   try {
+    let sort = {};
+    let by = -1;
+
+    if (req.params.by === 'desc') {
+      by = 1;
+    }
+
+    if (req.params.sort === 'name') {
+      sort = {
+        username: by
+      };
+    } else if (req.params.sort === 'date') {
+      sort = {
+        dateRegistered: by
+      };
+    }
+
+    let start = 1;
+    let end = 20;
+
+    let page = Number(req.params.page);
+
+    start = (page - 1) * end;
+
     let customers;
 
     if (ageParam === '<20') {
-      customers = await Customer.find({ age: { $lt: 20 } });
+      customers = await Customer.find({ age: { $lt: 20 } }).sort(sort);
     } else if (ageParam === '20-29') {
       customers = await Customer.find({
         age: {
           $gt: 19,
           $lt: 30
         }
-      });
+      }).sort(sort);
     } else if (ageParam === '30-39') {
       customers = await Customer.find({
         age: {
           $gt: 29,
           $lt: 40
         }
-      });
+      }).sort(sort);
     } else if (ageParam === '>40') {
       customers = await Customer.find({
         age: {
           $gt: 39
         }
-      });
+      }).sort(sort);
     } else {
       return res.status(404).json({
         success: false,
@@ -126,13 +178,23 @@ export const getCustomersByAge = async (req: Request, res: Response) => {
     if (customers.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Invalid age'
+        message: 'Customers Not Found'
       });
     }
 
+    const paginatedItems = customers.slice(start).slice(0, end);
+
+    const totalPages = Math.ceil(customers.length / 20);
+
     res.status(200).json({
       success: true,
-      customers
+      page,
+      pre_page: page - 1 ? page - 1 : null,
+      next_page: totalPages > page ? page + 1 : null,
+      total_page: totalPages,
+      per_page: end,
+      total: customers.length,
+      data: paginatedItems
     });
   } catch (error) {
     res.status(500).json({
@@ -154,8 +216,33 @@ export const getCustomersByNat = async (req: Request, res: Response) => {
       message: 'Invalid nationality'
     });
 
+  let sort = {};
+  let by = -1;
+
+  if (req.params.by === 'desc') {
+    by = 1;
+  }
+
+  if (req.params.sort === 'name') {
+    sort = {
+      username: by
+    };
+  } else if (req.params.sort === 'date') {
+    sort = {
+      dateRegistered: by
+    };
+  }
+
+  let start = 1;
+  let end = 20;
+
+  let page = Number(req.params.page);
+
+  start = (page - 1) * end;
+
   try {
-    const customers = await Customer.find({ nat });
+    const customers = await Customer.find({ nat }).sort(sort);
+
     if (customers.length === 0) {
       return res.status(404).json({
         success: false,
@@ -163,9 +250,19 @@ export const getCustomersByNat = async (req: Request, res: Response) => {
       });
     }
 
+    const paginatedItems = customers.slice(start).slice(0, end);
+
+    const totalPages = Math.ceil(customers.length / 20);
+
     res.status(200).json({
       success: true,
-      customers
+      page,
+      pre_page: page - 1 ? page - 1 : null,
+      next_page: totalPages > page ? page + 1 : null,
+      total_page: totalPages,
+      per_page: end,
+      total: customers.length,
+      data: paginatedItems
     });
   } catch (error) {
     res.status(500).json({
@@ -255,6 +352,81 @@ export const getCustomersByRegisterYear = async (req: Request, res: Response) =>
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const getNewlyRegisteredCustomers = async (req: Request, res: Response) => {
+  try {
+    const customers = await Customer.find({});
+
+    const now = new Date();
+
+    const date = new Date(now.getFullYear(), now.getMonth(), 1, 1, 0, 0, 0);
+
+    const newlyRegistered = customers.filter((customer) => {
+      const registered = new Date(customer.dateRegistered);
+      return registered > new Date(date);
+    });
+
+    res.status(200).json({
+      success: true,
+      data: newlyRegistered
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const getCustomersByPage = async (req: Request, res: Response) => {
+  try {
+    let sort = {};
+    let by = -1;
+
+    if (req.params.by === 'desc') {
+      by = 1;
+    }
+
+    if (req.params.sort === 'name') {
+      sort = {
+        username: by
+      };
+    } else if (req.params.sort === 'date') {
+      sort = {
+        dateRegistered: by
+      };
+    }
+
+    let start = 1;
+    let end = 20;
+
+    let page = Number(req.params.page);
+
+    start = (page - 1) * end;
+
+    const customers = await Customer.find({}).sort(sort);
+
+    const paginatedItems = customers.slice(start).slice(0, end);
+
+    const totalPages = Math.ceil(customers.length / 20);
+
+    res.status(200).json({
+      success: true,
+      page,
+      pre_page: page - 1 ? page - 1 : null,
+      next_page: totalPages > page ? page + 1 : null,
+      total_page: totalPages,
+      per_page: end,
+      total: customers.length,
+      data: paginatedItems
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
       message: error.message
     });
