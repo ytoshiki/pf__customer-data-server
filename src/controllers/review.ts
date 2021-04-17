@@ -73,7 +73,7 @@ export const addReview = async (req: Request, res: Response) => {
 
 export const getAllReviews = async (req: Request, res: Response) => {
   try {
-    const reviews = await Review.find({});
+    const reviews = await Review.find({}).populate('customer').populate('product');
     if (!reviews.length) {
       return res.status(401).json({
         success: false,
@@ -281,6 +281,53 @@ export const calcSatisfaction = async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       satisfaction: Math.floor(avarageSatisfaction * 10) / 10
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const getReviewsByProductId = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    const reviews = await Review.find({ product: id }).populate('customer').populate('product');
+    if (!reviews.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reviews Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      reviews
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const getReviewsByCustomerId = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    const reviews = await Review.find({ customer: id }).populate('customer').populate('product');
+    if (!reviews.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reviews Not Found'
+      });
+    }
+    res.status(200).json({
+      success: true,
+      reviews
     });
   } catch (error) {
     res.status(500).json({

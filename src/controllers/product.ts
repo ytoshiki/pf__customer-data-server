@@ -21,6 +21,34 @@ export const getAllProducts = async (req: Request, res: Response) => {
   } catch (error) {}
 };
 
+export const getRecentProducts = async (req: Request, res: Response) => {
+  const now = new Date();
+
+  const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+
+  try {
+    const products = await Product.find({
+      createdAt: {
+        $gt: lastMonth
+      }
+    })
+      .populate('category')
+      .populate('reviews');
+
+    if (!products.length) {
+      return res.status(401).json({
+        success: false,
+        message: 'Products Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      products
+    });
+  } catch (error) {}
+};
+
 export const getProductsWithRating = async (req: Request, res: Response) => {
   try {
     const products = await Product.find({}).populate('reviews');
@@ -152,7 +180,7 @@ export const deleteProductById = async (req: Request, res: Response) => {
 
 export const getProductById = async (req: Request, res: Response) => {
   try {
-    const product = await Product.find({ _id: req.params.id }).populate('category');
+    const product = await Product.findOne({ _id: req.params.id }).populate('category').populate('reviews');
 
     if (!product) {
       return res.status(401).json({

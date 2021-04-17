@@ -8,7 +8,7 @@ export const logAllPurchases = async (req: Request, res: Response) => {
   try {
     const purchases = await Purchase.find({}).populate('product').populate('customer');
     if (!purchases.length) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Purchases Not Found'
       });
@@ -32,7 +32,7 @@ export const logPurchasesByCustomerId = async (req: Request, res: Response) => {
     }).populate('product');
 
     if (!purchases.length) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Purchases Not Found'
       });
@@ -41,6 +41,71 @@ export const logPurchasesByCustomerId = async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       purchases
+    });
+  } catch (error) {}
+};
+
+export const logPurchasesByTerm = async (req: Request, res: Response) => {
+  try {
+    const term = req.params.term;
+
+    const now = new Date();
+    let date;
+    let startDate;
+    let endDate;
+    let dateError;
+
+    if (term === 'week') {
+      date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7, 0, 0, 0);
+    } else if (term === 'month') {
+      date = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+    } else if (term === 'year') {
+      date = new Date(now.getFullYear() - 1, now.getMonth(), 1, 0, 0, 0);
+    } else if (term.split('-').length === 2) {
+      const termArr = term.split('-');
+      const year: number = Number(termArr[0]);
+      const month: number = Number(termArr[1]);
+
+      if (String(year).length !== 4) {
+        dateError = 'Not Valid Year';
+      } else if (String(month).length > 2) {
+        dateError = 'Not Valid Month';
+      }
+
+      startDate = new Date(year, month - 1, 1, 0, 0, 0);
+      endDate = new Date(year, month, 1);
+    } else {
+    }
+
+    let options: any = {
+      $gt: date
+    };
+
+    if (startDate && endDate) {
+      options = {
+        $gt: startDate,
+        $lt: endDate
+      };
+    }
+
+    const purchases = await Purchase.find({
+      createdAt: options
+    })
+      .populate('product')
+      .populate('customer');
+
+    if (!purchases.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Purchases Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      number: purchases.length,
+      purchases,
+      options
     });
   } catch (error) {}
 };
@@ -58,7 +123,7 @@ export const logPurchase = async (req: Request, res: Response) => {
     });
 
     if (!purchase) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Purchase Not Found'
       });
@@ -73,7 +138,7 @@ export const logPurchase = async (req: Request, res: Response) => {
 
 export const createPurchase = async (req: Request, res: Response) => {
   if (!req.body.product || !req.body.customer) {
-    return res.status(401).json({
+    return res.status(404).json({
       success: false,
       message: 'You need to include product and customer'
     });
@@ -83,7 +148,7 @@ export const createPurchase = async (req: Request, res: Response) => {
     const product = await Product.findOne({ _id: req.body.product });
 
     if (!product) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: 'Invalid Product'
       });
@@ -135,7 +200,7 @@ export const getAnnuallData = async (req: Request, res: Response) => {
     const purchases = await Purchase.find({}).populate('product').populate('customer');
 
     if (!purchases.length) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Purchases Not Found'
       });
