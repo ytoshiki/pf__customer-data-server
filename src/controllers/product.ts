@@ -168,6 +168,7 @@ export const deleteProductById = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
+      product: product,
       message: 'Product deleted Successfully'
     });
   } catch (error) {
@@ -192,6 +193,35 @@ export const getProductById = async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       product
+    });
+  } catch (error) {}
+};
+
+export const updateProductById = async (req: Request, res: Response) => {
+  const id = req.params.id;
+
+  try {
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product Not Found'
+      });
+    }
+
+    Product.findByIdAndUpdate(id, req.body, { new: true }, function (err, updated) {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          message: err.message
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        product: updated
+      });
     });
   } catch (error) {}
 };
