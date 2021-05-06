@@ -68,6 +68,7 @@ export const deleteCategoryById = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
+      category,
       message: 'Category deleted successfully'
     });
   } catch (error) {
@@ -79,7 +80,7 @@ export const deleteCategoryById = async (req: Request, res: Response) => {
 };
 
 export const updateCategoryById = async (req: Request, res: Response) => {
-  if (!req.body.name && !req.body.image && !req.body.heading && !req.body.paragraph) {
+  if (!req.body.name || !req.body.image || !req.body.heading) {
     return res.status(401).json({
       success: false,
       message: 'You need to include name, image url, heading or paragraph'
