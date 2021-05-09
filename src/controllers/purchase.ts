@@ -262,3 +262,25 @@ export const getAnnuallData = async (req: Request, res: Response) => {
     });
   } catch (error) {}
 };
+
+export const countItemPurchase = async (req: Request, res: Response) => {
+  try {
+    const productId = req.params.p_id;
+
+    const purchases = await Purchase.find({
+      product: productId
+    }).populate('customer');
+
+    if (!purchases.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Purchases Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      purchases
+    });
+  } catch (error) {}
+};
