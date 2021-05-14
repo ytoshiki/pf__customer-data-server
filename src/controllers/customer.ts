@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Customer } from '../models/customer';
 import { generateCustomers } from '../helper';
 
-// One Time Only
+// *****Never Use It******
 // This sets default customers manually
 export const setCustomers = async (req: Request, res: Response) => {
   try {
@@ -62,6 +62,28 @@ export const getCustomerById = async (req: Request, res: Response) => {
       message: 'Customer Not Found'
     });
   }
+};
+
+export const getCustomerByName = async (req: Request, res: Response) => {
+  const username = req.params.name;
+
+  try {
+    const customer = await Customer.findOne({
+      username
+    });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      customer
+    });
+  } catch (error) {}
 };
 
 export const getCustomersByGender = async (req: Request, res: Response) => {
