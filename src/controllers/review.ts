@@ -95,7 +95,7 @@ export const getAllReviews = async (req: Request, res: Response) => {
 
 export const getReviewById = async (req: Request, res: Response) => {
   try {
-    const review = await Review.findOne({ _id: req.params.id });
+    const review = await Review.findOne({ _id: req.params.id }).populate('customer').populate('product');
     if (!review) {
       return res.status(401).json({
         success: false,

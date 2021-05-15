@@ -21,6 +21,28 @@ export const getAllProducts = async (req: Request, res: Response) => {
   } catch (error) {}
 };
 
+export const getProductByName = async (req: Request, res: Response) => {
+  const name = req.params.name;
+
+  try {
+    const product = await Product.findOne({
+      name
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      product
+    });
+  } catch (error) {}
+};
+
 export const getRecentProducts = async (req: Request, res: Response) => {
   const now = new Date();
 
@@ -184,7 +206,7 @@ export const getProductById = async (req: Request, res: Response) => {
     const product = await Product.findOne({ _id: req.params.id }).populate('category').populate('reviews');
 
     if (!product) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Product Not Found'
       });
@@ -194,7 +216,12 @@ export const getProductById = async (req: Request, res: Response) => {
       success: true,
       product
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
 export const updateProductById = async (req: Request, res: Response) => {

@@ -9,6 +9,7 @@ router.route('/data').get(getAnnuallData);
 router.route('/term/:term').get(logPurchasesByTerm);
 
 router.route('/:c_id').get(logPurchasesByCustomerId);
+
 router.route('/product/:p_id').get(countItemPurchase);
 
 router.route('/:c_id/:p_id').get(logPurchase);
