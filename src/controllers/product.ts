@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongoose';
+import { validateAuth } from '../helper/validateAuth';
 import { Category } from '../models/category';
 import { Product } from '../models/product';
 
@@ -116,7 +117,7 @@ export const addProduct = async (req: Request, res: Response) => {
   const validate = (f: string) => req.body[f];
   const isValid = mandatoryFields.every(validate);
   if (!isValid) {
-    return res.status(401).json({
+    return res.status(404).json({
       succcess: false,
       message: 'You need to include name, price, images and category'
     });
@@ -126,7 +127,7 @@ export const addProduct = async (req: Request, res: Response) => {
     const category = await Category.findById(req.body.category);
 
     if (!category) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Category Not Found'
       });
@@ -175,6 +176,16 @@ export const addProduct = async (req: Request, res: Response) => {
 
 export const deleteProductById = async (req: Request, res: Response) => {
   const id = req.params.id;
+
+  const u_id = (req as any).adminId;
+
+  if (!validateAuth(u_id)) {
+    return res.status(401).json({
+      succcess: false,
+      message: 'You are not authorized',
+      auth: true
+    });
+  }
 
   try {
     const product = await Product.findByIdAndDelete(id);
@@ -226,6 +237,16 @@ export const getProductById = async (req: Request, res: Response) => {
 
 export const updateProductById = async (req: Request, res: Response) => {
   const id = req.params.id;
+
+  const u_id = (req as any).adminId;
+
+  if (!validateAuth(u_id)) {
+    return res.status(401).json({
+      succcess: false,
+      message: 'You are not authorized',
+      auth: true
+    });
+  }
 
   try {
     const product = await Product.findById(id);

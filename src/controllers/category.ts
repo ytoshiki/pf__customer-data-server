@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { validateAuth } from '../helper/validateAuth';
 import { Category } from '../models/category';
 
 export const getAllCategories = async (req: Request, res: Response) => {
@@ -56,6 +57,15 @@ export const createCategory = async (req: Request, res: Response) => {
 };
 
 export const deleteCategoryById = async (req: Request, res: Response) => {
+  const u_id = (req as any).adminId;
+
+  if (!validateAuth(u_id)) {
+    return res.status(401).json({
+      succcess: false,
+      message: 'You are not authorized',
+      auth: true
+    });
+  }
   try {
     const category = await Category.findByIdAndRemove(req.params.id);
 
@@ -80,6 +90,16 @@ export const deleteCategoryById = async (req: Request, res: Response) => {
 };
 
 export const updateCategoryById = async (req: Request, res: Response) => {
+  const u_id = (req as any).adminId;
+
+  if (!validateAuth(u_id)) {
+    return res.status(401).json({
+      succcess: false,
+      message: 'You are not authorized',
+      auth: true
+    });
+  }
+
   if (!req.body.name || !req.body.image || !req.body.heading) {
     return res.status(401).json({
       success: false,

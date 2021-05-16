@@ -3,7 +3,7 @@ import { addProduct, deleteProductById, getAllProducts, getProductById, getProdu
 import { authenticateToken } from '../middleware';
 const router = express.Router();
 
-router.route('/').get(getAllProducts).post(addProduct);
+router.route('/').get(getAllProducts).post(authenticateToken, addProduct);
 
 router.route('/rating').get(getProductsWithRating);
 
@@ -11,5 +11,5 @@ router.route('/recent').get(getRecentProducts);
 
 router.route('/name/:name').get(getProductByName);
 
-router.route('/:id').get(getProductById).delete(deleteProductById).put(updateProductById);
+router.route('/:id').get(getProductById).delete(authenticateToken, deleteProductById).put(authenticateToken, updateProductById);
 export default router;

@@ -5,7 +5,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (token == null)
-    return res.status(401).json({
+    return res.status(404).json({
       success: false,
       message: 'Token Not Found'
     });
@@ -15,8 +15,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
     if (decoded) {
       (req as any).adminId = (decoded as { id: string }).id;
+      next();
     }
   });
-
-  next();
 };
