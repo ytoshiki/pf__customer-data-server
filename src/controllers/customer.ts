@@ -1,6 +1,11 @@
 import { Request, Response } from 'express';
 import { Customer } from '../models/customer';
-import { generateCustomers } from '../helper';
+import { generateAccessToken, generateCustomers } from '../helper';
+
+interface SignIn {
+  username: string;
+  password: string;
+}
 
 // *****Never Use It******
 // This sets default customers manually
@@ -462,29 +467,90 @@ export const getCustomersByPage = async (req: Request, res: Response) => {
 //
 export const createCustomer = async (req: Request, res: Response) => {
   const isFilled = (f: string) => req.body[f];
-  const mandatoryFields = ['username', 'email', 'nat', 'age', 'gender'];
+  const mandatoryFields = ['username', 'email', 'nat', 'age', 'gender', 'password'];
   const validData = mandatoryFields.every(isFilled);
 
   if (!validData)
-    res.status(400).json({
+    return res.status(404).json({
       success: false,
       message: 'Missing some mandatory fields'
     });
 
   try {
+    const userExist = await Customer.findOne({
+      username: req.body.username
+    });
+
+    if (userExist) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username is already taken'
+      });
+    }
+
     const user = new Customer(req.body);
 
     user.dateRegistered = new Date();
     const newUser = await user.save();
 
+    const token = generateAccessToken({ id: newUser._id.toString() });
+
     res.status(201).json({
       success: true,
-      newUser
+      newUser,
+      token
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+};
+
+export const signInCustomer = async (req: Request, res: Response) => {
+  const input: SignIn = req.body;
+  if (!input.username || !input.password || input.password.length < 6) {
+    return res.set(404).json({
+      success: false,
+      message: 'Empty field is not allowed'
+    });
+  }
+  try {
+    const customer = await Customer.findOne({ username: input.username }).populate('purchasedItems');
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer Not Found'
+      });
+    }
+
+    if (customer) {
+      // verify password
+      if (!(customer as any).verifyPassword(input.password)) {
+        return res.status(401).json({
+          success: false,
+          message: "Username and password don't match"
+        });
+      }
+
+      // create token
+      const token = generateAccessToken({ id: customer._id.toString() });
+
+      res.status(200).json({
+        success: true,
+        token,
+        customer
+      });
+    }
+    // if (user && user.VerifyPassword(input.password)) {
+
+    // }
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: "Username and password don't match"
     });
   }
 };

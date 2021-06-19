@@ -9,7 +9,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
     const products = await Product.find({}).populate('category');
 
     if (!products.length) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Products Not Found'
       });
@@ -19,7 +19,12 @@ export const getAllProducts = async (req: Request, res: Response) => {
       success: true,
       products
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: 'Products Not Found'
+    });
+  }
 };
 
 export const getProductByName = async (req: Request, res: Response) => {
@@ -41,7 +46,39 @@ export const getProductByName = async (req: Request, res: Response) => {
       success: true,
       product
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: 'Product Not Found'
+    });
+  }
+};
+
+export const getProductsByCategory = async (req: Request, res: Response) => {
+  const categoryId = req.params.category;
+
+  try {
+    const products = await Product.find({
+      category: categoryId
+    }).populate('category');
+
+    if (!products.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Products Not Found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      products
+    });
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: 'Products Not Found'
+    });
+  }
 };
 
 export const getRecentProducts = async (req: Request, res: Response) => {
@@ -69,7 +106,12 @@ export const getRecentProducts = async (req: Request, res: Response) => {
       success: true,
       products
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Products Not Found'
+    });
+  }
 };
 
 export const getProductsWithRating = async (req: Request, res: Response) => {
@@ -109,7 +151,12 @@ export const getProductsWithRating = async (req: Request, res: Response) => {
       success: true,
       data: ratingData
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
 export const addProduct = async (req: Request, res: Response) => {

@@ -1,15 +1,23 @@
 import mongoose, { Schema } from 'mongoose';
 import Customer from '../interfaces/customer';
+import bcrypt from 'bcryptjs';
 
 const CustomerSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true
+      required: true,
+      unique: true,
+      trim: true
     },
     email: {
       type: String,
       required: true
+    },
+    password: {
+      type: String,
+      required: true,
+      minLength: 6
     },
     nat: {
       type: String,
@@ -46,5 +54,32 @@ const CustomerSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+// Hash password before saving
+CustomerSchema.pre('save', async function (next) {
+  try {
+    if (!(this as any).isModified('password')) return next();
+
+    const salt = await bcrypt.genSalt(10);
+    (this as any).password = await bcrypt.hash((this as any).password, salt);
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// Varify password
+CustomerSchema.methods.verifyPassword = async (password: string) => {
+  try {
+    const success = await bcrypt.compare(password, (this as any).password);
+    if (success) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+};
 
 export const Customer = mongoose.model<Customer>('Customer', CustomerSchema);

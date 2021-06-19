@@ -33,7 +33,7 @@ export const createAdmin = async (req: Request, res: Response) => {
 export const signInAdmin = async (req: Request, res: Response) => {
   const input: SignIn = req.body;
   if (!input.name || !input.password || input.password.length < 6) {
-    res.set(400).json({
+    return res.set(400).json({
       success: false,
       message: 'Empty field is not allowed'
     });
@@ -51,9 +51,9 @@ export const signInAdmin = async (req: Request, res: Response) => {
     if (admin) {
       // verify password
       if (!admin.verifyPassword(input.password)) {
-        res.status(401).json({
+        return res.status(401).json({
           success: false,
-          message: "Uame and password don't match"
+          message: "Username and password don't match"
         });
       }
 
@@ -69,7 +69,12 @@ export const signInAdmin = async (req: Request, res: Response) => {
     // if (user && user.VerifyPassword(input.password)) {
 
     // }
-  } catch (error) {}
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Username and password don't match"
+    });
+  }
 };
 
 export const logoutAdmin = (req: Request, res: Response) => {
@@ -83,11 +88,12 @@ export const deleteAdmin = async (req: Request, res: Response) => {
   const adminId = (req as any).adminId;
   try {
     const admin = await Admin.findByIdAndDelete(adminId);
-    if (!admin)
-      res.status(401).json({
+    if (!admin) {
+      return res.status(401).json({
         success: false,
         message: 'Admin Not Found'
       });
+    }
 
     res.status(200).json({
       success: true,
