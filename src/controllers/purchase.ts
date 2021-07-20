@@ -173,7 +173,7 @@ export const createPurchase = async (req: Request, res: Response) => {
         }
       },
       { new: true }
-    );
+    ).populate('purchasedItems');
 
     if (!customer) {
       res.status(500).json({

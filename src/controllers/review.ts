@@ -10,7 +10,7 @@ export const addReview = async (req: Request, res: Response) => {
   const isValid = mandatoryFields.every(isFilled);
 
   if (!isValid) {
-    return res.status(401).json({
+    return res.status(404).json({
       success: false,
       message: 'You need to include rating, product, customer'
     });
@@ -21,7 +21,7 @@ export const addReview = async (req: Request, res: Response) => {
     const product = await Product.findOne({ _id: req.body.product });
 
     if (!product) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Invalid Product'
       });
@@ -75,7 +75,7 @@ export const getAllReviews = async (req: Request, res: Response) => {
   try {
     const reviews = await Review.find({}).populate('customer').populate('product');
     if (!reviews.length) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Reviews Not Found'
       });
@@ -97,7 +97,7 @@ export const getReviewById = async (req: Request, res: Response) => {
   try {
     const review = await Review.findOne({ _id: req.params.id }).populate('customer').populate('product');
     if (!review) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Review Not Found'
       });
@@ -123,16 +123,16 @@ export const updateReviewById = async (req: Request, res: Response) => {
   const isValid = mandatoryFields.every(isFilled);
 
   if (!isValid) {
-    return res.status(401).json({
+    return res.status(404).json({
       success: false,
       message: 'You need to include product and customer'
     });
   }
 
-  if (!validateFields.some((f: string) => req.body[f])) {
-    return res.status(401).json({
+  if (!req.body['rating']) {
+    return res.status(404).json({
       success: false,
-      message: 'You need rating or comment to update your review'
+      message: 'You need rating'
     });
   }
 
@@ -155,14 +155,14 @@ export const updateReviewById = async (req: Request, res: Response) => {
     const theReview = await Review.findOne({ _id: req.params.id });
 
     if (!theReview) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Review Not Found'
       });
     }
 
     if ((theReview as any).customer.toString() !== req.body.customer) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: 'You are not allowed to change the review'
       });
@@ -193,7 +193,7 @@ export const deleteReviewById = async (req: Request, res: Response) => {
     const review = await Review.findOne({ _id: req.params.id });
 
     if (!review) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Review Not Found'
       });
@@ -239,7 +239,7 @@ export const calcSatisfaction = async (req: Request, res: Response) => {
   try {
     const reviews = await Review.find({});
     if (!reviews.length) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: 'Reviews Not Found'
       });
