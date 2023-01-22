@@ -2,12 +2,13 @@
   "name": "dataAnalytics",
   "version": "1.0.0",
   "description": "",
+  "main": "dist/index.js",
   "scripts": {
+    "start": "node .",
     "clean": "rimraf dist/*",
     "tsc": "tsc",
+    "build": "npm-run-all clean tsc",
     "dev": "env-cmd -f config/dev.env ts-node-dev --respawn src",
-    "start": "node dist/src/index.js",
-    "build": "rimraf dist && tsc",
     "deploy": "npm run build && vercel --prod"
   },
   "keywords": [],
