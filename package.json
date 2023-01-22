@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "ts-node src/index.ts",
     "clean": "rimraf dist/*",
     "tsc": "tsc",
-    "build": "npm-run-all clean tsc",
     "dev": "env-cmd -f config/dev.env ts-node-dev --respawn src",
+    "start": "ts-node src/index.ts",
+    "build": "rimraf dist && tsc",
     "deploy": "npm run build && vercel --prod"
   },
   "keywords": [],
