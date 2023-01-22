@@ -8,7 +8,8 @@
     "clean": "rimraf dist/*",
     "tsc": "tsc",
     "build": "npm-run-all clean tsc",
-    "dev": "env-cmd -f config/dev.env ts-node-dev --respawn src"
+    "dev": "env-cmd -f config/dev.env ts-node-dev --respawn src",
+    "deploy": "npm run build && vercel --prod"
   },
   "keywords": [],
   "author": "",
