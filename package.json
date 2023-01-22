@@ -6,7 +6,7 @@
     "clean": "rimraf dist/*",
     "tsc": "tsc",
     "dev": "env-cmd -f config/dev.env ts-node-dev --respawn src",
-    "start": "ts-node src/index.ts",
+    "start": "node dist/src/index.js",
     "build": "rimraf dist && tsc",
     "deploy": "npm run build && vercel --prod"
   },
