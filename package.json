@@ -2,9 +2,8 @@
   "name": "dataAnalytics",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/src/index.js",
   "scripts": {
-    "start": "node .",
+    "start": "s-node src/index.ts",
     "clean": "rimraf dist/*",
     "tsc": "tsc",
     "build": "npm-run-all clean tsc",
